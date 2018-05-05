@@ -3,100 +3,112 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
-	"github.com/mitchellh/mapstructure"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/context"
-	"github.com/gorilla/mux"
+	"github.com/labstack/echo"
 )
 
-func main() {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/authenticate", CreateTokenEndpoint).Methods("POST")
-	router.HandleFunc("/login", ValidateMiddleware(LoginEndpoint)).Methods("GET")
-
-	log.Fatal(http.ListenAndServe(":8080", router))
+type Cat struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
-type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type Dog struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
-type JwtToken struct {
-	Token string `json:"token"`
+type Hamster struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
-type Exception struct {
-	Message string `json:"message"`
+func helloWorld(c echo.Context) error {
+	return c.String(http.StatusOK, "Hello, World!")
 }
 
-func CreateTokenEndpoint(w http.ResponseWriter, req *http.Request) {
-	var user User
-	_ = json.NewDecoder(req.Body).Decode(&user)
+func getCats(c echo.Context) error {
+	catName := c.QueryParam("name")
+	catType := c.QueryParam("type")
 
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"username": user.Username,
-			"password": user.Password,
+	dataType := c.Param("data")
+
+	if dataType == "string" {
+		return c.String(http.StatusOK, fmt.Sprintf("your cat name is: %s\nand is type: %s\n", catName, catType))
+	}
+
+	if dataType == "json" {
+		return c.JSON(http.StatusOK, map[string]string{
+			"name": catName,
+			"type": catType,
 		})
-
-	tokenString, error := token.SignedString([]byte("secret"))
-
-	if error != nil {
-		fmt.Println(error)
 	}
-	json.NewEncoder(w).Encode(JwtToken{Token: tokenString})
+
+	return c.JSON(http.StatusBadRequest, map[string]string{
+		"error": "invalid request",
+	})
 }
 
-func LoginEndpoint(w http.ResponseWriter, req *http.Request) {
-	params := req.URL.Query()
-	token, _ := jwt.Parse(params["token"][0], func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("There was an error")
-		}
-		return []byte("secret"), nil
-	})
+func addCat(c echo.Context) error {
+	cat := Cat{}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		var user User
+	defer c.Request().Body.Close()
 
-		mapstructure.Decode(claims, &user)
-		json.NewEncoder(w).Encode(Exception{Message: "Invalid authorization token"})
+	b, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		log.Printf("Failed to read the request body for addCat: %s", err)
+		return c.String(http.StatusInternalServerError, "")
 	}
+
+	err = json.Unmarshal(b, &cat)
+	if err != nil {
+		log.Printf("Failed to unmarshal in addCat: %s", err)
+		return c.String(http.StatusInternalServerError, "")
+	}
+
+	log.Printf("this is your cat: %#v", cat)
+	return c.String(http.StatusOK, "we got your cat!")
 }
 
-func ValidateMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		authorizationHeader := req.Header.Get("authorization")
-		if authorizationHeader != "" {
-			bearerToken := strings.Split(authorizationHeader, " ")
-			if len(bearerToken) == 2 {
-				token, error := jwt.Parse(bearerToken[1], func(token *jwt.Token) (interface{}, error) {
-					if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-						return nil, fmt.Errorf("There was an error")
-					}
-					return []byte("secret"), nil
-				})
-				if error != nil {
-					json.NewEncoder(w).Encode(Exception{Message: error.Error()})
-					return
-				}
-				if token.Valid {
-					context.Set(req, "decoded", token.Claims)
-					next(w, req)
-				} else {
-					json.NewEncoder(w).Encode(Exception{Message: "Invalid authorization token"})
-				}
-			}
-		} else {
-			json.NewEncoder(w).Encode(Exception{Message: "An authorization header is required"})
-		}
-	})
+func addDog(c echo.Context) error {
+	dog := Dog{}
+
+	defer c.Request().Body.Close()
+
+	err := json.NewDecoder(c.Request().Body).Decode(&dog)
+	if err != nil {
+		log.Printf("Failed processing addDog request: %s", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	log.Printf("this is your dog: %#v", dog)
+	return c.String(http.StatusOK, "we got your dog!")
+}
+
+func addHamster(c echo.Context) error {
+	hamster := Hamster{}
+
+	err := c.Bind(&hamster)
+	if err != nil {
+		log.Printf("Failed processing addHamster request: %s", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	log.Printf("this is your hamster: %#v", hamster)
+	return c.String(http.StatusOK, "we got your hamster!")
+}
+
+func main() {
+	fmt.Println("Welcome to the server!")
+
+	e := echo.New()
+	e.GET("/", helloWorld)
+	e.GET("/cats/:data", getCats)
+	e.POST("/cats", addCat)
+	e.POST("/dogs", addDog)
+	e.POST("/hamsters", addHamster)
+
+	e.Logger.Fatal(e.Start(":8000"))
 }
