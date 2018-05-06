@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type Cat struct {
@@ -103,16 +104,46 @@ func addHamster(c echo.Context) error {
 	return c.String(http.StatusOK, "we got your hamster!")
 }
 
+func mainAdmin(c echo.Context) error {
+	return c.String(http.StatusOK, "you have found the secret admin page, welcome!")
+}
+
+/////// middlewares ///////
+func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderServer, "BlueBot/1.0")
+		return next(c)
+	}
+}
+
 func main() {
 	fmt.Println("Welcome to the server!")
 
 	e := echo.New()
+	e.Use(ServerHeader)
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `[${time_rfc3339} ${status} ${host}${path} ${latency_human}]` + "\n",
+	}))
+
 	e.GET("/", helloWorld)
 	e.GET("/cats/:data", getCats)
 
 	e.POST("/cats", addCat)
 	e.POST("/dogs", addDog)
 	e.POST("/hamsters", addHamster)
+
+	g := e.Group("/admin")
+
+	// Adds basic auth to admin group
+	g.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		// Ideally you would check the DB here, but for simplicity just going to hard
+		if username == "maria@email.com" && password == "1234" {
+			return true, nil
+		}
+		return false, nil
+	}))
+
+	g.GET("/main", mainAdmin)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }
