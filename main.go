@@ -14,6 +14,35 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+func main() {
+	fmt.Println("Welcome to the server!")
+
+	e := echo.New()
+	e.Use(ServerHeader)
+
+	// Logging middleware
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: `[${time_rfc3339} ${status} ${host}${path} ${latency_human}]` + "\n",
+	}))
+
+	e.GET("/", helloWorld)
+	e.GET("/cats/:data", getCats)
+	e.GET("/login", login)
+
+	e.POST("/cats", addCat)
+	e.POST("/dogs", addDog)
+	e.POST("/hamsters", addHamster)
+
+	adminGroup := e.Group("/admin")
+	cookieGroup := e.Group("/cookie")
+	jwtGroup := e.Group("/jwt")
+
+	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningMethod: "HS512",
+		SigningKey:    []byte("mySecret"),
+		TokenLookup:   "cookie:JWTCookie",
+	}))
+
 type Cat struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
@@ -219,35 +248,6 @@ func validateCookie(next echo.HandlerFunc) echo.HandlerFunc {
 		return c.String(http.StatusUnauthorized, "you do not have the right cookie, cookie")
 	}
 }
-
-func main() {
-	fmt.Println("Welcome to the server!")
-
-	e := echo.New()
-	e.Use(ServerHeader)
-
-	// Logging middleware
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `[${time_rfc3339} ${status} ${host}${path} ${latency_human}]` + "\n",
-	}))
-
-	e.GET("/", helloWorld)
-	e.GET("/cats/:data", getCats)
-	e.GET("/login", login)
-
-	e.POST("/cats", addCat)
-	e.POST("/dogs", addDog)
-	e.POST("/hamsters", addHamster)
-
-	adminGroup := e.Group("/admin")
-	cookieGroup := e.Group("/cookie")
-	jwtGroup := e.Group("/jwt")
-
-	jwtGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: "HS512",
-		SigningKey:    []byte("mySecret"),
-		TokenLookup:   "cookie:JWTCookie",
-	}))
 
 	// Adds basic auth to admin group
 	adminGroup.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
