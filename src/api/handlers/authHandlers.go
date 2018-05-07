@@ -20,18 +20,8 @@ func Login(c echo.Context) error {
 
 	// Ideally you would verify username and password in DB after hashing password
 	if username == "maria" && password == "1234" {
-		// You could also write this as:
-		// cookie := new(http.Cookie)
-		cookie := &http.Cookie{}
-		cookie.Name = "sessionID"
-		cookie.Value = "some_string"
-		// cookie.Secure = true
-		cookie.Expires = time.Now().Add(48 * time.Hour)
-
-		c.SetCookie(cookie)
-
 		// create jwt token
-		token, err := createJwtToken()
+		jwtToken, err := createJwtToken()
 		if err != nil {
 			log.Println("Error creating JWT token", err)
 			return c.String(http.StatusInternalServerError, "Something went wrong!")
@@ -40,14 +30,14 @@ func Login(c echo.Context) error {
 		jwtCookie := &http.Cookie{}
 
 		jwtCookie.Name = "JWTCookie"
-		jwtCookie.Value = token
+		jwtCookie.Value = jwtToken
+		jwtCookie.Secure = false
 		jwtCookie.Expires = time.Now().Add(48 * time.Hour)
 
 		c.SetCookie(jwtCookie)
 
 		return c.JSON(http.StatusOK, map[string]string{
-			"message": "You are logged in!",
-			"token":   token,
+			"token": jwtToken,
 		})
 	}
 
@@ -63,7 +53,7 @@ func createJwtToken() (string, error) {
 		},
 	}
 
-	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	token, err := rawToken.SignedString([]byte("mySecret"))
 	if err != nil {
