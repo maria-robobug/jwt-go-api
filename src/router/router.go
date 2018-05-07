@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/labstack/echo"
+	"github.com/maria-robobug/jwt-go-api/src/api"
 	"github.com/maria-robobug/jwt-go-api/src/api/middlewares"
 )
 
@@ -18,6 +19,14 @@ func New() *echo.Echo {
 	middlewares.SetAdminMiddlewares(adminGroup)
 	middlewares.SetCookieMiddlewares(cookieGroup)
 	middlewares.SetJwtMiddlewares(jwtGroup)
+
+	// set main routes
+	api.MainGroup(e)
+
+	// set group routes
+	api.AdminGroup(adminGroup)
+	api.CookieGroup(cookieGroup)
+	api.JwtGroup(jwtGroup)
 
 	return e
 }
