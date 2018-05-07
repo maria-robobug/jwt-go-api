@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-func SetMainMiddleware(e *echo.Echo) {
+func SetMainMiddlewares(e *echo.Echo) {
 	// Echo: Logging middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339} ${status} ${host}${path} ${latency_human}]` + "\n",
@@ -14,7 +14,7 @@ func SetMainMiddleware(e *echo.Echo) {
 	e.Use(serverHeader)
 }
 
-/////// Custom Middlewares ///////
+// Custom header middleware
 func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderServer, "RoboBug/1.0")

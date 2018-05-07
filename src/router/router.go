@@ -14,8 +14,10 @@ func New() *echo.Echo {
 	jwtGroup := e.Group("/jwt")
 
 	// set all middlewares
-	middlewares.SetMainMiddleware(e)
-	middlewares.SetAdminMiddleware(adminGroup)
+	middlewares.SetMainMiddlewares(e)
+	middlewares.SetAdminMiddlewares(adminGroup)
+	middlewares.SetCookieMiddlewares(cookieGroup)
+	middlewares.SetJwtMiddlewares(jwtGroup)
 
 	return e
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-func SetAdminMiddleware(g *echo.Group) {
+func SetAdminMiddlewares(g *echo.Group) {
 	// Echo: basic auth middleware
 	g.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		// Ideally you would check the DB here, but for simplicity just going to hardcode
