@@ -8,7 +8,7 @@ import (
 func SetMainMiddlewares(e *echo.Echo) {
 	// Echo: Logging middleware
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `[${time_rfc3339} ${status} ${host}${path} ${latency_human}]` + "\n",
+		Format: `[ ${time_rfc3339} ] - status=${status} host=${host} path=${path} latency=${latency_human}` + "\n",
 	}))
 
 	e.Use(serverHeader)

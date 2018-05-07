@@ -10,7 +10,9 @@ import (
 )
 
 type JwtClaims struct {
-	Name string `json:"name"`
+	Username string `json:"username"`
+	UserID   string `json:"user_id"`
+	NextStep string `json:"next_step"`
 	jwt.StandardClaims
 }
 
@@ -27,15 +29,6 @@ func Login(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "Something went wrong!")
 		}
 
-		jwtCookie := &http.Cookie{}
-
-		jwtCookie.Name = "JWTCookie"
-		jwtCookie.Value = jwtToken
-		jwtCookie.Secure = false
-		jwtCookie.Expires = time.Now().Add(48 * time.Hour)
-
-		c.SetCookie(jwtCookie)
-
 		return c.JSON(http.StatusOK, map[string]string{
 			"token": jwtToken,
 		})
@@ -47,9 +40,10 @@ func Login(c echo.Context) error {
 func createJwtToken() (string, error) {
 	claims := JwtClaims{
 		"maria",
+		"18995",
+		"/security/questions",
 		jwt.StandardClaims{
-			Id:        "main_user_id",
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(60 * time.Second).Unix(),
 		},
 	}
 

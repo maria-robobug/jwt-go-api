@@ -13,7 +13,7 @@ func SecurityQuestions(c echo.Context) error {
 	token := user.(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 
-	log.Println("User Name: ", claims["name"], "User ID: ", claims["jti"])
+	log.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"])
 
 	return c.String(http.StatusOK, "you are on the security questions page!")
 }
