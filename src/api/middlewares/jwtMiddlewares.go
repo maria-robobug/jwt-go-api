@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// Echo: JWT middleware
 func SetJwtMiddlewares(g *echo.Group) {
 	g.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: "HS512",
