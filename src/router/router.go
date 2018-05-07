@@ -10,23 +10,17 @@ func New() *echo.Echo {
 	e := echo.New()
 
 	// create groups
-	adminGroup := e.Group("/admin")
-	cookieGroup := e.Group("/cookie")
-	jwtGroup := e.Group("/jwt")
+	securityGroup := e.Group("/security")
 
 	// set all middlewares
 	middlewares.SetMainMiddlewares(e)
-	middlewares.SetAdminMiddlewares(adminGroup)
-	middlewares.SetCookieMiddlewares(cookieGroup)
-	middlewares.SetJwtMiddlewares(jwtGroup)
+	middlewares.SetJwtMiddlewares(securityGroup)
 
-	// set main routes
+	// unathenticated routes
 	api.MainGroup(e)
 
-	// set group routes
-	api.AdminGroup(adminGroup)
-	api.CookieGroup(cookieGroup)
-	api.JwtGroup(jwtGroup)
+	// authenticated routes
+	api.SecurityGroup(securityGroup)
 
 	return e
 }

@@ -8,13 +8,12 @@ import (
 	"github.com/labstack/echo"
 )
 
-func MainJwt(c echo.Context) error {
+func SecurityQuestions(c echo.Context) error {
 	user := c.Get("user")
 	token := user.(*jwt.Token)
-
 	claims := token.Claims.(jwt.MapClaims)
 
 	log.Println("User Name: ", claims["name"], "User ID: ", claims["jti"])
 
-	return c.String(http.StatusOK, "you are on the top secret jwt page!")
+	return c.String(http.StatusOK, "you are on the security questions page!")
 }
