@@ -1,9 +1,8 @@
 package router
 
 import (
-	"../api/middlewares"
-
 	"github.com/labstack/echo"
+	"github.com/maria-robobug/jwt-go-api/src/api/middlewares"
 )
 
 func New() *echo.Echo {
@@ -16,6 +15,7 @@ func New() *echo.Echo {
 
 	// set all middlewares
 	middlewares.SetMainMiddleware(e)
+	middlewares.SetAdminMiddleware(adminGroup)
 
 	return e
 }
