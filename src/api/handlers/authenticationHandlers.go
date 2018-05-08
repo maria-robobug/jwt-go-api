@@ -35,7 +35,9 @@ func Login(c echo.Context) error {
 		})
 	}
 
-	return c.String(http.StatusUnauthorized, "Your username or password was invalid.")
+	return c.JSON(http.StatusUnauthorized, map[string]string{
+		"error": "Your username or password was invalid.",
+	})
 }
 
 func createJwtToken() (string, error) {
@@ -46,6 +48,8 @@ func createJwtToken() (string, error) {
 		"/security/questions",
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(60 * time.Second).Unix(),
+			Issuer:    "localhost:8000",
+			Audience:  "localhost:3000",
 		},
 	}
 

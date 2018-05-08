@@ -15,5 +15,7 @@ func SecurityQuestions(c echo.Context) error {
 
 	log.Println("User Name: ", claims["username"], "User ID: ", claims["user_id"])
 
-	return c.String(http.StatusOK, "you are on the security questions page!")
+	return c.JSON(http.StatusOK, map[string]string{
+		"security_question": "Who is your favourite superhero?",
+	})
 }
