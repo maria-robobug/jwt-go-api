@@ -12,6 +12,7 @@ import (
 type JwtClaims struct {
 	Username string `json:"username"`
 	UserID   string `json:"user_id"`
+	Admin    bool   `json:"admin"`
 	NextStep string `json:"next_step"`
 	jwt.StandardClaims
 }
@@ -41,6 +42,7 @@ func createJwtToken() (string, error) {
 	claims := JwtClaims{
 		"maria",
 		"18995",
+		false,
 		"/security/questions",
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(60 * time.Second).Unix(),
