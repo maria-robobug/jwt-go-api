@@ -7,5 +7,5 @@ import (
 
 func UnauthenticatedGroup(e *echo.Echo) {
 	e.GET("/", handlers.Root)
-	e.GET("/login", handlers.Login)
+	e.GET("/login", handlers.GetLogin)
 }

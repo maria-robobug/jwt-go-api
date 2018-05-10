@@ -10,17 +10,19 @@ import (
 	"github.com/maria-robobug/jwt-go-api/src/api/models"
 )
 
-func Login(c echo.Context) error {
+func GetLogin(c echo.Context) error {
 	username := c.QueryParam("username")
 	password := c.QueryParam("password")
 
 	// Ideally you would verify username and password in DB after hashing password
 	if username == "maria" && password == "1234" {
 		// create jwt token
-		jwtToken, err := createJwtToken()
+		jwtToken, err := createLoginJwtToken()
 		if err != nil {
 			log.Println("Error creating JWT token", err)
-			return c.String(http.StatusInternalServerError, "Something went wrong!")
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "Something went wrong...",
+			})
 		}
 
 		return c.JSON(http.StatusOK, map[string]string{
@@ -33,11 +35,10 @@ func Login(c echo.Context) error {
 	})
 }
 
-func createJwtToken() (string, error) {
+func createLoginJwtToken() (string, error) {
 	claims := models.JwtClaims{
 		"maria",
 		"18995",
-		false,
 		"/security/questions",
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(60 * time.Second).Unix(),

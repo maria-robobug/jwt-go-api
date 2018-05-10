@@ -7,5 +7,5 @@ import (
 )
 
 func Root(c echo.Context) error {
-	return c.String(http.StatusOK, "Welcome!")
+	return c.JSON(http.StatusOK, map[string]string{"title": "Welcome Traveller!"})
 }

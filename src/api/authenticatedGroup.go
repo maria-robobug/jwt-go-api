@@ -6,5 +6,5 @@ import (
 )
 
 func AuthenticatedGroup(g *echo.Group) {
-	g.GET("/questions", handlers.SecurityQuestions)
+	g.GET("/questions", handlers.GetSecurityQuestions)
 }
