@@ -7,15 +7,8 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/maria-robobug/jwt-go-api/src/api/models"
 )
-
-type JwtClaims struct {
-	Username string `json:"username"`
-	UserID   string `json:"user_id"`
-	Admin    bool   `json:"admin"`
-	NextStep string `json:"next_step"`
-	jwt.StandardClaims
-}
 
 func Login(c echo.Context) error {
 	username := c.QueryParam("username")
@@ -41,7 +34,7 @@ func Login(c echo.Context) error {
 }
 
 func createJwtToken() (string, error) {
-	claims := JwtClaims{
+	claims := models.JwtClaims{
 		"maria",
 		"18995",
 		false,

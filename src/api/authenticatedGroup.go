@@ -5,8 +5,6 @@ import (
 	"github.com/maria-robobug/jwt-go-api/src/api/handlers"
 )
 
-func MainGroup(e *echo.Echo) {
-	e.GET("/", handlers.Root)
-
-	e.GET("/login", handlers.Login)
+func AuthenticatedGroup(g *echo.Group) {
+	g.GET("/questions", handlers.SecurityQuestions)
 }

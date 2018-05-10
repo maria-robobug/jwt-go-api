@@ -17,10 +17,10 @@ func New() *echo.Echo {
 	middlewares.SetJwtMiddlewares(securityGroup)
 
 	// unathenticated routes
-	api.MainGroup(e)
+	api.UnauthenticatedGroup(e)
 
 	// authenticated routes
-	api.SecurityGroup(securityGroup)
+	api.AuthenticatedGroup(securityGroup)
 
 	return e
 }
